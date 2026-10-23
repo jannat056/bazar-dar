@@ -12,7 +12,7 @@ export default function SignUpPage() {
   const [confirmPassword, setConfirmPassword] = useState("");
   const [otp, setOtp] = useState("");
   
-  const [step, setStep] = useState<"form" | "otp">("form"); // State to handle form vs OTP verification step
+  const [step, setStep] = useState<"form" | "otp">("form");
   const [loading, setLoading] = useState(false);
   const [errorMessage, setErrorMessage] = useState("");
   const router = useRouter();
@@ -26,67 +26,30 @@ export default function SignUpPage() {
     { name: "ছোলা", price: "১২০", change: "২.৪%", isUp: false },
   ];
 
-  // 1. Send OTP & Create User Trigger
+  // 1. Register User & Trigger OTP
   const handleSignUpSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setErrorMessage("");
 
     if (!name.trim() || !email.trim() || !password || !confirmPassword) {
-      setErrorMessage("Doyakore sob gulo field puron korun!");
+      setErrorMessage("দয়া করে সবগুলো ফিল্ড পূরণ করুন!");
       return;
     }
 
     if (password !== confirmPassword) {
-      setErrorMessage("Password ebong confirm password mile nai!");
+      setErrorMessage("পাসওয়ার্ড এবং কনফার্ম পাসওয়ার্ড মিলছে না!");
       return;
     }
 
     if (password.length < 8) {
-      setErrorMessage("Password kompokhe 8 okhorer hote hobe.");
+      setErrorMessage("পাসওয়ার্ড কমপক্ষে ৮ অক্ষরের হতে হবে।");
       return;
     }
 
     setLoading(true);
 
     try {
-      // Step A: Send Email OTP first
-      const res = await authClient.emailOtp.sendVerificationOtp({
-        email,
-        type: "sign-in",
-      });
-
-      if (res.error) {
-        const msg = res.error.message || "";
-        if (msg.toLowerCase().includes("exist")) {
-          setErrorMessage("Ei email diye already account kora ache! Please sign in.");
-        } else {
-          setErrorMessage(msg || "OTP pathate somossa hoyeche.");
-        }
-        setLoading(false);
-      } else {
-        setLoading(false);
-        setStep("otp"); // Move to OTP input view
-      }
-    } catch (err) {
-      setErrorMessage("Network ba Server error hoyeche! Terminal check korun.");
-      setLoading(false);
-    }
-  };
-
-  // 2. Verify OTP & Finalize Registration
-  const handleVerifyOTP = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setErrorMessage("");
-
-    if (!otp.trim()) {
-      setErrorMessage("Doyakore 6-digit OTP code ti din.");
-      return;
-    }
-
-    setLoading(true);
-
-    try {
-      // Sign up with BetterAuth OTP
+      // BetterAuth sign up (automatically triggers verification email/OTP if configured)
       const res = await authClient.signUp.email({
         email,
         password,
@@ -94,13 +57,50 @@ export default function SignUpPage() {
       });
 
       if (res.error) {
-        setErrorMessage(res.error.message || "OTP Verification failed!");
+        const msg = res.error.message || "";
+        if (msg.toLowerCase().includes("exist")) {
+          setErrorMessage("এই ইমেইল দিয়ে ইতিমধ্যে অ্যাকাউন্ট করা আছে! অনুগ্রহ করে সাইন ইন করুন।");
+        } else {
+          setErrorMessage(msg || "অ্যাকাউন্ট তৈরি করতে সমস্যা হয়েছে।");
+        }
+        setLoading(false);
+      } else {
+        setLoading(false);
+        setStep("otp"); // Move to OTP input view
+      }
+    } catch (err) {
+      setErrorMessage("নেটওয়ার্ক বা সার্ভার এরর হয়েছে!");
+      setLoading(false);
+    }
+  };
+
+  // 2. Verify OTP
+  const handleVerifyOTP = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setErrorMessage("");
+
+    if (!otp.trim()) {
+      setErrorMessage("দয়া করে ৬ ডিজিটের OTP কোডটি দিন।");
+      return;
+    }
+
+    setLoading(true);
+
+    try {
+      // Verify email using BetterAuth emailOtp plugin
+      const res = await authClient.emailOtp.verifyEmail({
+        email,
+        otp,
+      });
+
+      if (res.error) {
+        setErrorMessage(res.error.message || "OTP ভেরিফিকেশন ব্যর্থ হয়েছে!");
         setLoading(false);
       } else {
         router.push("/"); // Success
       }
     } catch (err) {
-      setErrorMessage("OTP verify korte somossa hoyeche!");
+      setErrorMessage("OTP ভেরিফাই করতে সমস্যা হয়েছে!");
       setLoading(false);
     }
   };
@@ -167,7 +167,7 @@ export default function SignUpPage() {
             {errorMessage && (
               <div className="mb-4 p-3 bg-red-50 border border-red-200 text-red-600 text-xs rounded-xl text-center font-medium shadow-sm">
                 {errorMessage}{" "}
-                {errorMessage.includes("sign in") && (
+                {errorMessage.includes("সাইন ইন") && (
                   <div className="mt-1">
                     <Link href="/auth/signin" className="underline font-bold text-emerald-700">
                       Sign In করুন →
@@ -233,7 +233,7 @@ export default function SignUpPage() {
                   disabled={loading}
                   className="w-full bg-[#058847] hover:bg-[#04733c] text-white font-semibold py-2.5 rounded-lg transition text-xs shadow-2xs mt-2 cursor-pointer disabled:opacity-50"
                 >
-                  {loading ? "OTP পাঠানো হচ্ছে..." : "অ্যাকাউন্ট তৈরি করুন"}
+                  {loading ? "অ্যাকাউন্ট তৈরি হচ্ছে..." : "অ্যাকাউন্ট তৈরি করুন"}
                 </button>
               </form>
             ) : (
@@ -263,7 +263,7 @@ export default function SignUpPage() {
                 <button
                   type="button"
                   onClick={() => setStep("form")}
-                  className="w-full text-xs text-gray-500 hover:underline text-center block pt-2"
+                  className="w-full text-xs text-gray-500 hover:underline text-center block pt-2 cursor-pointer"
                 >
                   ← ফর্মে ফিরে যান
                 </button>
@@ -286,14 +286,14 @@ export default function SignUpPage() {
                     onClick={() => authClient.signIn.social({ provider: "google" })}
                     className="flex items-center justify-center gap-1.5 py-2 px-2 border border-gray-200 rounded-lg text-[11px] font-medium text-gray-700 hover:bg-gray-50 transition cursor-pointer"
                   >
-                    <span className="text-emerald-600 font-bold text-xs">G</span> Google দিয়ে চালিয়ে যান
+                    <span className="text-emerald-600 font-bold text-xs">G</span> Google দিয়ে চালিয়ে যান
                   </button>
                   <button
                     type="button"
                     onClick={() => authClient.signIn.social({ provider: "github" })}
                     className="flex items-center justify-center gap-2 py-2 px-2 border border-gray-200 rounded-lg text-[11px] font-medium text-gray-700 hover:bg-gray-50 transition cursor-pointer"
                   >
-                    <span>🐙</span> GitHub দিয়ে চালিয়ে যান
+                    <span>🐙</span> GitHub দিয়ে চালিয়ে যান
                   </button>
                 </div>
               </>
