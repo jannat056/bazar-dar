@@ -32,24 +32,24 @@ export default function SignUpPage() {
     setErrorMessage("");
 
     if (!name.trim() || !email.trim() || !password || !confirmPassword) {
-      setErrorMessage("দয়া করে সবগুলো ফিল্ড পূরণ করুন!");
+      setErrorMessage("দয়া করে সবগুলো ফিল্ড পূরণ করুন!");
       return;
     }
 
     if (password !== confirmPassword) {
-      setErrorMessage("পাসওয়ার্ড এবং কনফার্ম পাসওয়ার্ড মিলছে না!");
+      setErrorMessage("পাসওয়ার্ড এবং কনফার্ম পাসওয়ার্ড মিলছে না!");
       return;
     }
 
     if (password.length < 8) {
-      setErrorMessage("পাসওয়ার্ড কমপক্ষে ৮ অক্ষরের হতে হবে।");
+      setErrorMessage("পাসওয়ার্ড কমপক্ষে ৮ অক্ষরের হতে হবে।");
       return;
     }
 
     setLoading(true);
 
     try {
-      // BetterAuth sign up (automatically triggers verification email/OTP if configured)
+      // Step A: Create user account in DB
       const res = await authClient.signUp.email({
         email,
         password,
@@ -59,17 +59,30 @@ export default function SignUpPage() {
       if (res.error) {
         const msg = res.error.message || "";
         if (msg.toLowerCase().includes("exist")) {
-          setErrorMessage("এই ইমেইল দিয়ে ইতিমধ্যে অ্যাকাউন্ট করা আছে! অনুগ্রহ করে সাইন ইন করুন।");
+          setErrorMessage("এই ইমেইল দিয়ে ইতিমধ্যে অ্যাকাউন্ট করা আছে! অনুগ্রহ করে সাইন ইন করুন।");
         } else {
-          setErrorMessage(msg || "অ্যাকাউন্ট তৈরি করতে সমস্যা হয়েছে।");
+          setErrorMessage(msg || "অ্যাকাউন্ট তৈরি করতে সমস্যা হয়েছে।");
         }
         setLoading(false);
-      } else {
-        setLoading(false);
-        setStep("otp"); // Move to OTP input view
+        return;
       }
+
+      // Step B: Send OTP email via BetterAuth emailOtp plugin
+      const otpRes = await authClient.emailOtp.sendVerificationOtp({
+        email,
+        type: "sign-in", // BetterAuth plugin-এর নিয়ম অনুযায়ী valid type
+      });
+
+      if (otpRes.error) {
+        setErrorMessage(otpRes.error.message || "OTP পাঠাতে সমস্যা হয়েছে।");
+        setLoading(false);
+        return;
+      }
+
+      setLoading(false);
+      setStep("otp"); // Move to OTP input view
     } catch (err) {
-      setErrorMessage("নেটওয়ার্ক বা সার্ভার এরর হয়েছে!");
+      setErrorMessage("নেটওয়ার্ক বা সার্ভার এরর হয়েছে!");
       setLoading(false);
     }
   };
@@ -80,7 +93,7 @@ export default function SignUpPage() {
     setErrorMessage("");
 
     if (!otp.trim()) {
-      setErrorMessage("দয়া করে ৬ ডিজিটের OTP কোডটি দিন।");
+      setErrorMessage("দয়া করে ৬ ডিজিটের OTP কোডটি দিন।");
       return;
     }
 
@@ -94,13 +107,13 @@ export default function SignUpPage() {
       });
 
       if (res.error) {
-        setErrorMessage(res.error.message || "OTP ভেরিফিকেশন ব্যর্থ হয়েছে!");
+        setErrorMessage(res.error.message || "OTP ভেরিফিকেশন ব্যর্থ হয়েছে!");
         setLoading(false);
       } else {
         router.push("/"); // Success
       }
     } catch (err) {
-      setErrorMessage("OTP ভেরিফাই করতে সমস্যা হয়েছে!");
+      setErrorMessage("OTP ভেরিফাই করতে সমস্যা হয়েছে!");
       setLoading(false);
     }
   };
