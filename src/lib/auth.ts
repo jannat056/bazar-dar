@@ -1,4 +1,5 @@
 import { betterAuth } from "better-auth";
+import { mongodbAdapter } from "better-auth/adapters/mongodb";
 import { MongoClient } from "mongodb";
 import { emailOTP } from "better-auth/plugins";
 import { Resend } from "resend";
@@ -15,7 +16,7 @@ const db = client.db("bazardor");
 const resend = new Resend(process.env.RESEND_API_KEY);
 
 export const auth = betterAuth({
-  database: db,
+  database: mongodbAdapter(db), // 👈 ekhane mongodbAdapter(db) hobe!
   emailAndPassword: {
     enabled: true,
     minPasswordLength: 8,
