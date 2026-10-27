@@ -29,6 +29,7 @@ export default function SignInPage() {
     setLoading(true);
 
     try {
+      console.log("Attempting sign in with:", email);
       await signIn.email(
         {
           email,
@@ -36,15 +37,18 @@ export default function SignInPage() {
         },
         {
           onSuccess: () => {
-            router.push("/"); // Successful sign in re-directs to home page
+            console.log("Sign in successful!");
+            router.push("/"); // Successful sign in redirects to home page
           },
           onError: (ctx) => {
+            console.error("Sign in error context:", ctx);
             setErrorMessage(ctx.error.message || "ইমেইল বা পাসওয়ার্ড ভুল হয়েছে!");
             setLoading(false);
           },
         }
       );
     } catch (err) {
+      console.error("Network or server catch error:", err);
       setErrorMessage("নেটওয়ার্ক বা সার্ভারে সমস্যা হয়েছে! আবার চেষ্টা করুন।");
       setLoading(false);
     }

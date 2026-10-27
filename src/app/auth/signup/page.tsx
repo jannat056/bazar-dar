@@ -69,9 +69,10 @@ export default function SignUpPage() {
       }
 
       // Step B: Send OTP email via BetterAuth emailOtp plugin
+      // Fixed: Removed incorrect type or set it properly according to sign-up flow
       const otpRes = await authClient.emailOtp.sendVerificationOtp({
         email,
-        type: "sign-in",
+        type: "email-verification", 
       });
 
       if (otpRes.error) {
@@ -83,6 +84,7 @@ export default function SignUpPage() {
       setLoading(false);
       setStep("otp"); // Move to OTP input view
     } catch (err) {
+      console.error("Signup error:", err);
       setErrorMessage("নেটওয়ার্ক বা সার্ভার এরর হয়েছে!");
       setLoading(false);
     }
@@ -114,6 +116,7 @@ export default function SignUpPage() {
         router.push("/"); // Success
       }
     } catch (err) {
+      console.error("OTP verification error:", err);
       setErrorMessage("OTP ভেরিফাই করতে সমস্যা হয়েছে!");
       setLoading(false);
     }
