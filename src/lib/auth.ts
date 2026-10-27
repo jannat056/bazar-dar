@@ -3,9 +3,12 @@ import { MongoClient } from "mongodb";
 import { emailOTP } from "better-auth/plugins";
 import { Resend } from "resend";
 
-// Database Connection String & Clients
-const MONGODB_URI =
-  "mongodb+srv://jannatjr648:Rj008765@cluster0.fggcizt.mongodb.net/bazardor?retryWrites=true&w=majority";
+// Pull credentials safely from environment variables
+const MONGODB_URI = process.env.MONGODB_URI;
+
+if (!MONGODB_URI) {
+  throw new Error("Please define the MONGODB_URI environment variable inside .env.local");
+}
 
 const client = new MongoClient(MONGODB_URI);
 const db = client.db("bazardor");
@@ -36,7 +39,7 @@ export const auth = betterAuth({
                 <h2 style="color: #058847; margin-bottom: 8px;">Bazar Dor</h2>
                 <p style="color: #374151; font-size: 14px;">Use the following One-Time Password (OTP) to verify your account:</p>
                 <div style="text-align: center; margin: 20px 0;">
-                  <span style="background: #f4f6f3; padding: 12px 24px; font-size: 24px; font-weight: bold; letter-spacing: 6px; color: #058847; border-radius: 8px; border: 1px border #d1d5db; display: inline-block;">${otp}</span>
+                  <span style="background: #f4f6f3; padding: 12px 24px; font-size: 24px; font-weight: bold; letter-spacing: 6px; color: #058847; border-radius: 8px; border: 1px solid #d1d5db; display: inline-block;">${otp}</span>
                 </div>
                 <p style="color: #6b7280; font-size: 12px; margin-top: 16px;">This verification code will expire in 10 minutes. If you did not request this, please ignore this email.</p>
               </div>
@@ -50,10 +53,10 @@ export const auth = betterAuth({
   ],
   socialProviders: {
     github: {
-      clientId: "Ov23livWFmbLj8Szr3vt",
-      clientSecret: "a6ac69909ce66ba4c0b7738937b00bce57e128bd",
+      clientId: process.env.GITHUB_CLIENT_ID as string,
+      clientSecret: process.env.GITHUB_CLIENT_SECRET as string,
     },
   },
-  secret: "bazardor_secret_key_123456789",
-  baseURL: "http://localhost:3000",
+  secret: process.env.BETTER_AUTH_SECRET,
+  baseURL: process.env.BETTER_AUTH_URL,
 });

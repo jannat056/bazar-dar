@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useState } from "react";
 import { authClient } from "@/lib/auth-client";
 import { useRouter } from "next/navigation";
+import { getFormattedBanglaDate } from "@/lib/utils";
 
 export default function SignUpPage() {
   const [name, setName] = useState("");
@@ -70,7 +71,7 @@ export default function SignUpPage() {
       // Step B: Send OTP email via BetterAuth emailOtp plugin
       const otpRes = await authClient.emailOtp.sendVerificationOtp({
         email,
-        type: "sign-in", // BetterAuth plugin-এর নিয়ম অনুযায়ী valid type
+        type: "sign-in",
       });
 
       if (otpRes.error) {
@@ -130,7 +131,7 @@ export default function SignUpPage() {
                 <span>বাজার দর</span>
               </Link>
               <span className="text-xs text-gray-400 font-medium hidden sm:inline-block">
-                মঙ্গলবার, ৬ অক্টোবর, ২০২৬
+                {getFormattedBanglaDate()}
               </span>
             </div>
 

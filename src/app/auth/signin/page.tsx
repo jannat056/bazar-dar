@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useState } from "react";
 import { signIn } from "@/lib/auth-client";
 import { useRouter } from "next/navigation";
+import { getFormattedBanglaDate } from "@/lib/utils";
 
 export default function SignInPage() {
   const [email, setEmail] = useState("");
@@ -64,7 +65,7 @@ export default function SignInPage() {
                 <span>বাজার দর</span>
               </Link>
               <span className="text-xs text-gray-400 font-medium hidden sm:inline-block">
-                মঙ্গলবার, ৬ অক্টোবর, ২০২৬
+                {getFormattedBanglaDate()}
               </span>
             </div>
 
@@ -190,14 +191,14 @@ export default function SignInPage() {
                 onClick={() => signIn.social({ provider: "google" })}
                 className="flex items-center justify-center gap-1.5 py-2 px-2.5 border border-gray-200 rounded-lg text-[11px] font-medium text-gray-700 hover:bg-gray-50 active:scale-[0.98] transition-all cursor-pointer"
               >
-                <span className="text-emerald-600 font-bold text-xs">G</span> Google দিয়ে চালিয়ে যান
+                <span className="text-emerald-600 font-bold text-xs">G</span> Google দিয়ে চালিয়ে যান
               </button>
               <button
                 type="button"
                 onClick={() => signIn.social({ provider: "github" })}
                 className="flex items-center justify-center gap-2 py-2 px-2.5 border border-gray-200 rounded-lg text-[11px] font-medium text-gray-700 hover:bg-gray-50 active:scale-[0.98] transition-all cursor-pointer"
               >
-                <span>🐙</span> GitHub দিয়ে চালিয়ে যান
+                <span>🐙</span> GitHub দিয়ে চালিয়ে যান
               </button>
             </div>
 
@@ -225,8 +226,8 @@ export default function SignInPage() {
       {/* 5. Minimal Footer */}
       <footer className="bg-transparent py-4 px-4 md:px-12 text-[11px] text-gray-400 border-t border-gray-200/40">
         <div className="max-w-7xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-2 text-center">
-          <p>বাজার দর — প্রয়োজনীয় পণ্যের দাম এক নজরে।</p>
-          <p>সকল দাম সম্ভাব্য; বাজার অবস্থার ওপর নির্ভর করে পরিবর্তিত হয়।</p>
+          <p>বাজার দর — প্রয়োজনীয় পণ্যের দাম এক নজরে।</p>
+          <p>সকল দাম সম্ভাব্য; বাজার অবস্থার ওপর নির্ভর করে পরিবর্তিত হয়।</p>
         </div>
       </footer>
     </div>

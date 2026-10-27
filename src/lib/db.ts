@@ -1,6 +1,6 @@
 import { MongoClient } from "mongodb";
 
-const MONGODB_URI = "mongodb+srv://jannatjr648:Rj008765@cluster0.fggcizt.mongodb.net/bazardor?retryWrites=true&w=majority";
+const MONGODB_URI = process.env.MONGODB_URI;
 
 if (!MONGODB_URI) {
   throw new Error("Please define the MONGODB_URI environment variable inside .env.local");
